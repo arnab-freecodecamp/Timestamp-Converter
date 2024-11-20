@@ -1,0 +1,73 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timestamp Converter</title>
+    <link rel="shortcut icon" href="https://cdn.freecodecamp.org/universal/favicons/favicon-32x32.png" type="image/x-icon"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <link href="/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="container">
+        <h1>Timestamp Converter</h1>
+        <hr />
+        
+        <div class="converter-box">
+            <h2>Convert Date/Timestamp:</h2>
+            <div class="input-group">
+                <input type="text" id="dateInput" placeholder="Enter date or timestamp...">
+                <button onclick="convertDate()">Convert</button>
+            </div>
+            <div id="result" class="result-box hidden">
+                <pre><code id="resultJson"></code></pre>
+            </div>
+        </div>
+
+        <div class="examples">
+            <h2>Example Inputs:</h2>
+            <ul>
+                <li>Unix Timestamp: 1451001600000</li>
+                <li>Date String: 2015-12-25</li>
+                <li>Natural Date: December 25, 2015</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>By <a href="https://www.linkedin.com/in/arnab-das-2a5039182/">Arnab</a></p>
+        </div>
+    </div>
+
+    <script>
+        function convertDate() {
+            const dateInput = document.getElementById('dateInput').value;
+            const resultDiv = document.getElementById('result');
+            const resultJson = document.getElementById('resultJson');
+
+            if (!dateInput.trim()) {
+                resultJson.textContent = 'Please enter a date or timestamp';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+
+            fetch('/api/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dateInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultJson.textContent = JSON.stringify(data, null, 2);
+                resultDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                resultJson.textContent = JSON.stringify({ error: "Failed to convert date" }, null, 2);
+                resultDiv.classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
