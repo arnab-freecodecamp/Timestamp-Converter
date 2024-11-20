@@ -1,4 +1,3 @@
-// index.js
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -16,7 +15,35 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-// Your original API endpoint
+// API endpoint for `/api/:date?`
+app.get('/api/:date?', (req, res) => {
+  let dateParam = req.params.date;
+  let date;
+
+  // Handle empty date parameter
+  if (!dateParam) {
+    date = new Date();
+  } else if (/^\d+$/.test(dateParam)) {
+    // Handle Unix timestamp (convert to number first)
+    date = new Date(parseInt(dateParam));
+  } else {
+    // Handle ISO 8601 or other date string
+    date = new Date(dateParam);
+  }
+
+  // Check if date is valid
+  if (date.toString() === "Invalid Date") {
+    return res.status(400).json({ error: "Invalid Date" });
+  }
+
+  // Return Unix and UTC formats
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString()
+  });
+});
+
+// Your original `/api/convert` endpoint (if needed for the frontend)
 app.post('/api/convert', (req, res) => {
   const { dateInput } = req.body;
   let date;
@@ -34,20 +61,19 @@ app.post('/api/convert', (req, res) => {
       return res.status(400).json({ error: "Invalid Date" });
     }
 
-    // Calculate relative time
+    // Return relative time and other data
     const now = new Date();
     const diffInSeconds = Math.floor((date - now) / 1000);
     const absSeconds = Math.abs(diffInSeconds);
-    
     let relativeTime = 'Just now';
-    
+
     if (absSeconds >= 60) {
       const times = {
         year: Math.floor(absSeconds / (365 * 24 * 60 * 60)),
         month: Math.floor(absSeconds / (30 * 24 * 60 * 60)),
         day: Math.floor(absSeconds / (24 * 60 * 60)),
         hour: Math.floor(absSeconds / (60 * 60)),
-        minute: Math.floor(absSeconds / 60)
+        minute: Math.floor(absSeconds / 60),
       };
 
       for (const [unit, value] of Object.entries(times)) {
